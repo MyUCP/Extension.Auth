@@ -2,21 +2,13 @@
 
 namespace Extensions\Auth;
 
-use Application;
-use Controller;
-use Extensions\Auth\controllers\TestController;
-use Extensions\Auth\controllers\UserController;
-use MyUCP\Extension\BootExtensionable;
 use Router;
-use View;
+use Application;
+use MyUCP\Extension\BootExtension;
+use Extensions\Auth\controllers\UserController;
 
-class Auth implements BootExtensionable
+class Auth extends BootExtension
 {
-    /**
-     * @var Application
-     */
-    protected $app;
-
     /**
      * @var
      */
@@ -24,6 +16,7 @@ class Auth implements BootExtensionable
 
     /**
      * @param Application $app
+     * @throws \ReflectionException
      */
     public function bootstrap(Application $app)
     {
@@ -32,13 +25,13 @@ class Auth implements BootExtensionable
         $this->config = config('auth');
 
         // Определение путей для шаблонов расширения
-        View::preLoad("auth.common", $this->path('resources' . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'auth.common.zara.php'));
-        View::preLoad("auth.login", $this->path('resources' . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'auth.login.zara.php'));
-        View::preLoad("auth.register", $this->path('resources' . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'auth.register.zara.php'));
+        $this->view("auth.common", $this->path('resources' . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'auth.common.zara.php'));
+        $this->view("auth.login", $this->path('resources' . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'auth.login.zara.php'));
+        $this->view("auth.register", $this->path('resources' . DIRECTORY_SEPARATOR . 'views' . DIRECTORY_SEPARATOR . 'auth.register.zara.php'));
 
         // Определение контроллера
 
-        Controller::alias(UserController::class, $this->path('controllers/UserController.php'));
+        $this->controller(UserController::class, $this->path('controllers/UserController.php'));
 
         // Определение маршрутов для расширения
 
@@ -153,16 +146,5 @@ class Auth implements BootExtensionable
     public static function check()
     {
         return app('session')->has("_u_id");
-    }
-
-    /**
-     * Получить путь к расширению
-     *
-     * @param $path
-     * @return string
-     */
-    public function path($path)
-    {
-        return EXTENSIONS_DIR . 'Auth' . DIRECTORY_SEPARATOR . $path;
     }
 }
